@@ -2,12 +2,10 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { installGlobals } from "@remix-run/node";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { netlifyPreset } from "@netlify/remix/vite"; // ✅ Netlify preset
 
 installGlobals({ nativeFetch: true });
 
-// Related: https://github.com/remix-run/remix/issues/2835#issuecomment-1144102176
-// Replace the HOST env var with SHOPIFY_APP_URL so that it doesn't break the remix server.
+// Shopify HOST workaround
 if (
   process.env.HOST &&
   (!process.env.SHOPIFY_APP_URL ||
@@ -17,8 +15,7 @@ if (
   delete process.env.HOST;
 }
 
-const host = new URL(process.env.SHOPIFY_APP_URL || "http://localhost")
-  .hostname;
+const host = new URL(process.env.SHOPIFY_APP_URL || "http://localhost").hostname;
 
 let hmrConfig;
 if (host === "localhost") {
@@ -51,16 +48,7 @@ export default defineConfig({
   },
   plugins: [
     remix({
-      presets: [netlifyPreset()], // ✅ tell Remix to build for Netlify
-      ignoredRouteFiles: ["**/.*"],
-      future: {
-        v3_fetcherPersist: true,
-        v3_relativeSplatPath: true,
-        v3_throwAbortReason: true,
-        v3_lazyRouteDiscovery: true,
-        v3_singleFetch: false,
-        v3_routeConfig: true,
-      },
+      ignoredRouteFiles: ["**/.*"], // keep Remix clean
     }),
     tsconfigPaths(),
   ],
